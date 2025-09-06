@@ -1,4 +1,6 @@
 // ==UserScript==
+// @updateURL  https://raw.githubusercontent.com/用户名/仓库名/分支名/脚本名.user.js
+// @downloadURL  https://raw.githubusercontent.com/用户名/仓库名/分支名/脚本名.user.js
 // @name         jp kawai
 // @namespace    charismafight@hotmail.com
 // @version      0.1
