@@ -1,6 +1,4 @@
 // ==UserScript==
-// @updateURL  https://raw.githubusercontent.com/charismafight/kawai_order/main/main.user.js
-// @downloadURL  https://raw.githubusercontent.com/charismafight/kawai_order/main/main.user.js
 // @name         jp kawai
 // @namespace    charismafight@hotmail.com
 // @version      0.1
