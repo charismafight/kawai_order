@@ -9,6 +9,8 @@
 // @license      MIT
 // ==/UserScript==
 
+console.log("tamper monkey started");
+
 (function () {
   "use strict";
   const testName = "カートに入れる";
