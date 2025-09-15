@@ -4,7 +4,7 @@ from email.header import Header
 from email.mime.text import MIMEText
 
 
-def sendMail(msg):
+def sendMail(msg, url):
     # list of email_id to send the mail
     li = ["yinmingcan1999@gmail.com", "charismafight@hotmail.com"]
 
@@ -19,13 +19,25 @@ def sendMail(msg):
         s.sendmail("ll@champath.cn", dest, message.as_string())
 
 
-itemUrl = 'https://www.tokyokawaiilife.jp/fs/lizlisaadmin/351-6238-0'
-response = requests.get(itemUrl)
-response.raise_for_status()
-page_content = response.content.decode('shift_jis')
+def queryStock(url, keyword):
+    response = requests.get(url)
+    response.raise_for_status()
+    page_content = response.content.decode('shift_jis')
+    if keyword in page_content:
+        return
+    else:
+        sendMail('有货', url)
 
-if 'ブラック(104)/SOLD OUT' in page_content:
-    print("卖完")
-else:
-    print("有货")
-    sendMail('有货')
+
+urlTuple = [
+    ('https://www.tokyokawaiilife.jp/fs/lizlisaadmin/351-6238-0',
+     'ブラック(104)/SOLD OUT'),
+    ('https://www.tokyokawaiilife.jp/fs/lizlisaadmin/all-bottoms/353-5117-0',
+     'ピンク(110)/SOLD OUT'),
+    ('https://www.tokyokawaiilife.jp/fs/lizlisaadmin/all-tops/351-1018-0',
+     'ブラック(104)/SOLD OUT'),
+]
+
+for t in urlTuple:
+    print(t[0])
+    queryStock(t[0], t[1])
