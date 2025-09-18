@@ -24,18 +24,16 @@ def queryStock(url, keyword):
     response.raise_for_status()
     page_content = response.content.decode('shift_jis')
     if keyword in page_content:
-        return
-    else:
         sendMail('有货', url)
 
 
 urlTuple = [
     ('https://www.tokyokawaiilife.jp/fs/lizlisaadmin/351-6238-0',
-     'ブラック(104)/SOLD OUT'),
+     'varno_1_1'),
     ('https://www.tokyokawaiilife.jp/fs/lizlisaadmin/all-bottoms/353-5117-0',
-     'ピンク(110)/SOLD OUT'),
+     'varno_3_1'),
     ('https://www.tokyokawaiilife.jp/fs/lizlisaadmin/all-tops/351-1018-0',
-     'ブラック(104)/SOLD OUT'),
+     'varno_2_1'),
 ]
 
 for t in urlTuple:
