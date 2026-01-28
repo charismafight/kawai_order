@@ -1,16 +1,17 @@
 // ==UserScript==
-// @name         jp kawai
+// @name         angelicpretty
 // @namespace    charismafight@hotmail.com
 // @version      1.0
 // @description  automatically submit basic data to order
 // @author       lli
-// @match        *://www.tokyokawaiilife.jp/*
+// @match        *://angelicpretty.com/*
 // @grant        none
 // @license      MIT
 // ==/UserScript==
 
 function addPersistentNumberInputToTopLeft(options = {}) {
   const STORAGE_KEY = "persistent_number_input"; // 本地存储的键名
+  const STORAGE_SUBMIT_DIRECTLY = "STORAGE_SUBMIT_DIRECTLY";
   const config = {
     placeholder: "input quantity",
     onInput: null,
@@ -18,7 +19,6 @@ function addPersistentNumberInputToTopLeft(options = {}) {
     ...options,
   };
 
-  // 创建容器和输入框（同之前）
   const container = document.createElement("div");
   container.style.position = "fixed";
   container.style.top = "10px";
@@ -38,6 +38,26 @@ function addPersistentNumberInputToTopLeft(options = {}) {
   input.style.borderRadius = "4px";
   input.style.fontSize = "14px";
 
+  // 新增：创建checkbox和标签
+  const checkboxWrapper = document.createElement("div");
+  checkboxWrapper.style.marginTop = "8px";
+  checkboxWrapper.style.display = "flex";
+  checkboxWrapper.style.alignItems = "center";
+
+  const checkbox = document.createElement("input");
+  checkbox.type = "checkbox";
+  checkbox.id = "cbAutoSubmit";
+  checkbox.style.marginRight = "6px";
+
+  const checkboxLabel = document.createElement("label");
+  checkboxLabel.htmlFor = "cbAutoSubmit";
+  checkboxLabel.textContent = "自动提交";
+  checkboxLabel.style.fontSize = "14px";
+  checkboxLabel.style.color = "#333";
+
+  checkboxWrapper.appendChild(checkbox);
+  checkboxWrapper.appendChild(checkboxLabel);
+
   const errorMsg = document.createElement("div");
   errorMsg.style.color = "red";
   errorMsg.style.fontSize = "12px";
@@ -45,6 +65,7 @@ function addPersistentNumberInputToTopLeft(options = {}) {
   errorMsg.style.height = "15px";
 
   container.appendChild(input);
+  container.appendChild(checkboxWrapper);
   container.appendChild(errorMsg);
   document.body.appendChild(container);
 
@@ -52,6 +73,10 @@ function addPersistentNumberInputToTopLeft(options = {}) {
   const savedValue = localStorage.getItem(STORAGE_KEY);
   if (savedValue !== null) {
     input.value = savedValue;
+  }
+  const autoSubmit = localStorage.getItem(STORAGE_SUBMIT_DIRECTLY);
+  if (autoSubmit != null) {
+    checkbox.checked = autoSubmit == "true";
   }
 
   // 事件监听
@@ -78,6 +103,10 @@ function addPersistentNumberInputToTopLeft(options = {}) {
     }
   });
 
+  checkbox.addEventListener("change", function () {
+    localStorage.setItem(STORAGE_SUBMIT_DIRECTLY, this.checked);
+  });
+
   return {
     input,
     clearStorage: () => localStorage.removeItem(STORAGE_KEY),
@@ -86,19 +115,19 @@ function addPersistentNumberInputToTopLeft(options = {}) {
 
 function isCart() {
   const currentURL = window.location.href;
-  const targetURL = "https://www.tokyokawaiilife.jp/fs/lizlisaadmin/ShoppingCart.html";
+  const targetURL = "https://angelicpretty.com/Form/Order/CartList.aspx";
   return currentURL === targetURL;
 }
 
 function isOrderPayment() {
   const currentURL = window.location.href;
-  const targetURL = "https://www.tokyokawaiilife.jp/fs/lizlisaadmin/DeliveryEdit.html";
+  const targetURL = "https://angelicpretty.com/Form/Order/OrderPayment.aspx";
   return currentURL === targetURL;
 }
 
 function isConfirm() {
   const currentURL = window.location.href;
-  const targetURL = "https://www.tokyokawaiilife.jp/fs/lizlisaadmin/SettleEdit.html";
+  const targetURL = "https://angelicpretty.com/Form/Order/OrderConfirm.aspx";
   return currentURL === targetURL;
 }
 
@@ -118,28 +147,25 @@ function blockThreadForSeconds(seconds) {
   });
 
   if (isCart()) {
-    const countInput = document.getElementById("count");
+    const countInputs = document.querySelectorAll('input[name*="tbProductCount"]');
     const tempValue = document.getElementById("abcdefghijk")?.value;
-    console.log(`countInput.value:${countInput.value}  tempValue:${tempValue} `);
-    if (countInput.value != tempValue) {
-      countInput.value = tempValue;
-      document.getElementById("submit_1")?.click();
-      console.log("calc clicked");
-    } else {
-      document.getElementById("buy_here").click();
-      console.log("buy_here clicked");
-    }
+    countInputs.forEach((input, idx) => {
+      input.value = tempValue;
+    });
+    const linkBtn = document.querySelector('a[href*="WebForm_DoPostBackWithOptions"]');
+    linkBtn.click();
   }
 
   if (isOrderPayment()) {
-    document.getElementById("settleEdit").click();
-    console.log("settleEdit clicked");
+    const confirmButton = [...document.querySelectorAll("a")].find((a) => a.textContent.includes("ご注文内容確認へ"));
+    confirmButton.click();
   }
 
   if (isConfirm()) {
-    document.getElementById("fs2_settle-cod").click();
-    console.log("fs2_settle-cod clicked");
-    document.getElementById("submit").click();
-    console.log("submit clicked");
+    const submitBtn = document.querySelector('[id*="lbCompleteAfterComfirmPayment"]');
+    if (localStorage.getItem(STORAGE_SUBMIT_DIRECTLY, false) == "true") {
+      console.log("自动提交");
+      //   submitBtn.click();
+    }
   }
 })();
