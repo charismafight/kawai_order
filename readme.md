@@ -1,19 +1,11 @@
-# one-click order
+# This project is made by [Lee](https://github.com/charismafight) for hemingze
 
-This is a one-click tool for [kawai](https://www.tokyokawaiilife.jp/ )
+This project contains two parts
 
-## main.user.js is
+## 1. order
 
-This is a PamperMonkey script for auto filling order
+One click order
 
-## angelicpretty.user.js
+## 2. order-tracking
 
-This is a PamperMonkey script for [angelicpretty](angelicpretty.com)
-
-## main.py
-
-This is a script fetching data to judge stock of commodity
-
-### Usage
-
-> python main.py
+record order's information

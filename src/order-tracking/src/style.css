@@ -1,0 +1,13 @@
+/* src/style.css - 精简版 */
+/* 基础重置，抹平浏览器默认样式 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+  /* Naive UI 的主题会覆盖字体，这里只设一个兜底 */
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}

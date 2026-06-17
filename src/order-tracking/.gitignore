@@ -1,0 +1,63 @@
+# 依赖目录
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# 环境变量文件
+.env
+.env.*
+
+# 日志文件
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# 编辑器配置
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.vscode/*
+!.vscode/extensions.json
+.idea/workspace.xml
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 测试覆盖率
+coverage/
+*.lcov
+
+# 构建缓存
+.cache/
+.parcel-cache/
+.temp/
+.tmp/
+
+# TypeScript 缓存
+*.tsbuildinfo
+
+# Vite 特定
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+
+# 临时文件
+*.log
+*.pid
+*.seed
+*.pid.lock
+
+# 本地持久化数据
+*.sqlite
+*.sqlite3
+*.db
+
+# 上传文件目录（根据你的实际需求）
+# uploads/
+# temp/
