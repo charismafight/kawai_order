@@ -15,7 +15,7 @@
                     </template>
 
                     <n-upload ref="uploadRef" :action="uploadAction" :multiple="false" :accept="'image/*'"
-                        :max-size="5 * 1024 * 1024" :default-upload="false" :headers="uploadHeaders" :data="uploadData"
+                        :max-size="20 * 1024 * 1024" :default-upload="false" :headers="uploadHeaders" :data="uploadData"
                         @change="handleFileChange">
                         <n-upload-dragger class="upload-dragger">
                             <div class="dragger-content">
@@ -24,7 +24,7 @@
                                 </n-icon>
                                 <n-text class="upload-text">点击或拖拽图片到此处上传</n-text>
                                 <p class="upload-hint">
-                                    支持 JPG, PNG, GIF, WebP 格式，单个文件不超过 5MB
+                                    支持 JPG, PNG, GIF, WebP 格式，单个文件不超过 20MB
                                 </p>
                                 <n-space class="upload-actions" :size="12">
                                     <n-button type="primary" size="large" round>
@@ -147,7 +147,6 @@ import {
 const message = useMessage()
 
 // 响应式数据
-const uploadRef = ref()
 const currentQrCode = ref<string>('')
 const currentRecordId = ref<string>('')
 const currentFileName = ref<string>('')
@@ -202,9 +201,9 @@ const handleFileChange = async (data: { file: UploadFileInfo; fileList: UploadFi
     const file = data.file
 
     // 验证文件大小
-    const maxSize = 5 * 1024 * 1024
+    const maxSize = 20 * 1024 * 1024
     if (file.file?.size && file.file.size > maxSize) {
-        message.error('文件大小不能超过 5MB')
+        message.error('文件大小不能超过 20MB')
         return
     }
 

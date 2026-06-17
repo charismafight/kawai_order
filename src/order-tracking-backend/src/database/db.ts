@@ -11,7 +11,7 @@ if (!fs.existsSync(dataDir)) {
 const dbPath = path.join(dataDir, 'records.db')
 const db = new Database(dbPath)
 
-// 创建表（移除 DEFAULT CURRENT_TIMESTAMP，改由代码控制）
+// 创建表
 db.exec(`
   CREATE TABLE IF NOT EXISTS records (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -28,4 +28,5 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_created_at ON records(created_at);
 `)
 
+// ✅ 使用类型断言导出
 export default db

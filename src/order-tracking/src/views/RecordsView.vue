@@ -71,8 +71,6 @@ import {
     TrashOutline,
     RefreshOutline,
     SearchOutline,
-    DownloadOutline,
-    EyeOutline,
 } from '@vicons/ionicons5'
 
 const router = useRouter()
