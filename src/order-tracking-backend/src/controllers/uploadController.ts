@@ -21,7 +21,8 @@ export const uploadImage = async (req: Request, res: Response) => {
         })
 
         // 构造图片 URL（用于前端显示）
-        const baseUrl = `${req.protocol}://${req.get('host')}`
+        const port = 16666
+        const baseUrl = `${req.protocol}://${req.get('host')}:${port}`
         const imageUrl = `${baseUrl}/uploads/${path.basename(file.path)}`
 
         // 返回响应

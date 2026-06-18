@@ -15,7 +15,8 @@ export const getRecords = (req: Request, res: Response) => {
         const count = getRecordsCount()
 
         // 转换数据格式，添加图片URL
-        const baseUrl = `${req.protocol}://${req.get('host')}`
+        const port = 16666
+        const baseUrl = `${req.protocol}://${req.get('host')}:${port}`
         const formattedRecords = records.map(record => ({
             id: record.record_id,
             fileName: record.file_name,

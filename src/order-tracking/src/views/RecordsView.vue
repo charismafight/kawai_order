@@ -19,14 +19,6 @@
                             </template>
                             刷新
                         </n-button>
-                        <n-button size="small" ghost @click="clearAll">
-                            <template #icon>
-                                <n-icon>
-                                    <TrashOutline />
-                                </n-icon>
-                            </template>
-                            清空全部
-                        </n-button>
                     </div>
                 </div>
             </template>
@@ -68,7 +60,6 @@ import { useMessage, useDialog } from 'naive-ui'
 import type { DataTableColumns } from 'naive-ui'
 import {
     DocumentTextOutline,
-    TrashOutline,
     RefreshOutline,
     SearchOutline,
 } from '@vicons/ionicons5'
@@ -123,6 +114,30 @@ const filteredRecords = computed(() => {
     )
 })
 
+// 查看实际上传的图片
+const viewImage = (record: any) => {
+    const imageUrl = record.imageUrl
+    if (!imageUrl) {
+        message.warning('该记录没有图片')
+        return
+    }
+    dialog.info({
+        title: `图片预览 - ${record.fileName}`,
+        content: () => h('div', { style: 'text-align: center;' }, [
+            h('img', {
+                src: imageUrl,
+                style: 'max-width: 100%; max-height: 500px; border-radius: 8px;',
+                onError: () => {
+                    message.error('图片加载失败')
+                }
+            }),
+            h('p', { style: 'margin-top: 12px; color: #999; font-size: 14px;' }, `ID: ${record.id}`),
+            record.remark ? h('p', { style: 'color: #999; font-size: 14px;' }, `备注: ${record.remark}`) : null
+        ]),
+        positiveText: '关闭'
+    })
+}
+
 // 查看二维码
 const viewQrCode = (record: any) => {
     const imageUrl = record.imageUrl || `${API_BASE}/records/${record.id}/image`
@@ -145,22 +160,39 @@ const viewQrCode = (record: any) => {
     })
 }
 
-// 下载二维码
-const downloadQrCode = (record: any) => {
-    const imageUrl = record.imageUrl || `${API_BASE}/records/${record.id}/image`
+// 编辑备注
+const editRemark = (record: any) => {
+    const currentRemark = record.remark || ''
+    const newRemark = prompt(`编辑备注 - ${record.fileName}`, currentRemark)
 
-    import('qrcode').then((QRCode) => {
-        QRCode.toDataURL(imageUrl, {
-            width: 200,
-            margin: 2,
-        }).then((qrCodeDataUrl: string) => {
-            const link = document.createElement('a')
-            link.download = `qrcode-${record.id}.png`
-            link.href = qrCodeDataUrl
-            link.click()
-            message.success('二维码下载成功')
-        })
+    if (newRemark === null) return // 用户点击取消
+
+    const remark = newRemark.trim()
+    if (remark === currentRemark) {
+        message.info('备注未修改')
+        return
+    }
+
+    fetch(`${API_BASE}/records/${record.id}/remark`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ remark }),
     })
+        .then(res => res.json())
+        .then(result => {
+            if (result.success) {
+                message.success('备注已更新')
+                loadRecords()
+            } else {
+                message.error(result.error || '更新失败')
+            }
+        })
+        .catch(error => {
+            console.error('更新备注失败:', error)
+            message.error('更新失败，请重试')
+        })
 }
 
 // 删除记录
@@ -187,33 +219,6 @@ const deleteRecord = (id: string) => {
                 console.error('删除失败:', error)
                 message.error('删除失败，请重试')
             }
-        }
-    })
-}
-
-// 清空全部
-const clearAll = () => {
-    if (records.value.length === 0) {
-        message.info('暂无记录可清空')
-        return
-    }
-
-    dialog.warning({
-        title: '确认清空',
-        content: '确定要清空所有记录吗？此操作不可恢复！',
-        positiveText: '清空全部',
-        negativeText: '取消',
-        onPositiveClick: async () => {
-            const ids = records.value.map((r: any) => r.id)
-            for (const id of ids) {
-                try {
-                    await fetch(`${API_BASE}/records/${id}`, { method: 'DELETE' })
-                } catch (error) {
-                    console.error('删除失败:', id, error)
-                }
-            }
-            message.success('已清空所有记录')
-            await loadRecords()
         }
     })
 }
@@ -271,7 +276,7 @@ const columns = computed<DataTableColumns>(() => [
                     style: 'width: 40px; height: 40px; border: 1px solid #e5e5e5; border-radius: 4px; padding: 4px;',
                     onError: (e: Event) => {
                         import('qrcode').then((QRCode) => {
-                            QRCode.toDataURL(row.id, {
+                            QRCode.toDataURL(row.imageUrl || row.id, {
                                 width: 80,
                                 margin: 1,
                             }).then((qrCodeDataUrl: string) => {
@@ -288,60 +293,66 @@ const columns = computed<DataTableColumns>(() => [
         key: 'actions',
         width: 120,
         render: (row: any) => {
-            return h('div', { style: 'display: flex; gap: 12px; align-items: center;' }, [
+            return h('div', { style: 'display: flex; gap: 8px; align-items: center;' }, [
+                // 🔍 查看图片
                 h(
                     'button',
                     {
-                        onClick: () => downloadQrCode(row),
-                        title: '下载二维码',
-                        style: 'background: transparent; border: none; cursor: pointer; font-size: 22px; border-radius: 6px; transition: all 0.25s ease;',
+                        onClick: () => viewImage(row),
+                        title: '查看图片',
+                        style: 'background: transparent; border: none; cursor: pointer; font-size: 18px;  border-radius: 6px; transition: all 0.25s ease;',
                         onMouseenter: (e: MouseEvent) => {
                             const el = e.target as HTMLElement
-                            el.style.background = '#e6f7ed'
+                            el.style.background = '#e6f0ff'
                             el.style.transform = 'scale(1.15)'
                         },
                         onMouseleave: (e: MouseEvent) => {
                             const el = e.target as HTMLElement
                             el.style.background = 'transparent'
                             el.style.transform = 'scale(1)'
-                        },
-                        onMouseDown: (e: MouseEvent) => {
-                            const el = e.target as HTMLElement
-                            el.style.transform = 'scale(0.92)'
-                        },
-                        onMouseUp: (e: MouseEvent) => {
-                            const el = e.target as HTMLElement
-                            el.style.transform = 'scale(1.15)'
                         }
                     },
-                    { default: () => '🔽' }
+                    { default: () => '🔍' }
                 ),
+                // ✏️ 编辑备注
+                h(
+                    'button',
+                    {
+                        onClick: () => editRemark(row),
+                        title: '编辑备注',
+                        style: 'background: transparent; border: none; cursor: pointer; font-size: 18px;  border-radius: 6px; transition: all 0.25s ease;',
+                        onMouseenter: (e: MouseEvent) => {
+                            const el = e.target as HTMLElement
+                            el.style.background = '#fff3e0'
+                            el.style.transform = 'scale(1.15)'
+                        },
+                        onMouseleave: (e: MouseEvent) => {
+                            const el = e.target as HTMLElement
+                            el.style.background = 'transparent'
+                            el.style.transform = 'scale(1)'
+                        }
+                    },
+                    { default: () => '✏️' }
+                ),
+                // ❌ 删除（红色 ×）
                 h(
                     'button',
                     {
                         onClick: () => deleteRecord(row.id),
                         title: '删除记录',
-                        style: 'background: transparent; border: none; cursor: pointer; font-size: 22px; border-radius: 6px; transition: all 0.25s ease;',
+                        style: 'background: transparent; border: none; cursor: pointer; font-size: 22px;  border-radius: 6px; transition: all 0.25s ease; color: #ff4d4f; font-weight: bold;',
                         onMouseenter: (e: MouseEvent) => {
                             const el = e.target as HTMLElement
                             el.style.background = '#fde8e8'
-                            el.style.transform = 'scale(1.15)'
+                            el.style.transform = 'scale(1.2)'
                         },
                         onMouseleave: (e: MouseEvent) => {
                             const el = e.target as HTMLElement
                             el.style.background = 'transparent'
                             el.style.transform = 'scale(1)'
-                        },
-                        onMouseDown: (e: MouseEvent) => {
-                            const el = e.target as HTMLElement
-                            el.style.transform = 'scale(0.92)'
-                        },
-                        onMouseUp: (e: MouseEvent) => {
-                            const el = e.target as HTMLElement
-                            el.style.transform = 'scale(1.15)'
                         }
                     },
-                    { default: () => '❌' }
+                    { default: () => '✕' }
                 )
             ])
         }
